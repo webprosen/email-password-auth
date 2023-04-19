@@ -1,5 +1,9 @@
 import React from 'react';
 import { useState } from 'react';
+import { getAuth , signInWithEmailAndPassword } from "firebase/auth";
+import app from '../../firebase/firebase.config'
+
+const auth = getAuth(app);
 
 const Login = () => {
     const [error, setError] = useState('');
@@ -10,21 +14,18 @@ const Login = () => {
         const form = event.target;
         const email = form.email.value;
         const password = form.password.value;
-        console.log(password);
-        setError('');
 
-        if(!/(?=.*[A-Z])/.test(password)){
-            setError('At least one UPPERCASE');
-            return;
-        }
-        else if(!/(?=.*[0-9])/.test(password)){
-            setError('At least one NUMBER');
-            return;
-        }
-        else if(password.length < 6){
-            setError('Minimum length 6+');
-            return;
-        }
+        signInWithEmailAndPassword(auth, email, password)
+        .then(result => {
+            const loggedUser  = result.user;
+            setSuccess('Logged in done!!!');
+            setError('');
+            form.reset();
+        })
+        .catch(error => {
+            setError(error.message);
+        });
+
     }
 
     return (

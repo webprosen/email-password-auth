@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAuth , createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth , createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import app from '../../firebase/firebase.config'
 import { useState } from 'react';
 
@@ -18,11 +18,7 @@ const Register = () => {
         setSuccess('');
         setError('');
 
-        if(!/(?=.*[A-Z])/.test(password)){
-            setError('At least one UPPERCASE');
-            return;
-        }
-        else if(!/(?=.*[0-9])/.test(password)){
+        if(!/(?=.*[0-9])/.test(password)){
             setError('At least one NUMBER');
             return;
         }
@@ -32,16 +28,24 @@ const Register = () => {
         }
 
         createUserWithEmailAndPassword(auth, email, password)
-        .then(userCredential => {
-            const user = userCredential.user;
+        .then(result => {
+            const user = result.user;
+            console.log(result);
             event.target.reset();
             setSuccess('User created successfully');
+            sendEmail(user);
         })
         .catch(error => {
             const errorMessage = error.message;
             setError(errorMessage);
         });
-        
+
+        const sendEmail = user => {
+            sendEmailVerification(user)
+            .then(result => {
+                alert('Please verify your email');
+            })
+        }
     }
 
     return (
