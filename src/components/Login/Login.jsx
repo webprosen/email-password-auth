@@ -1,13 +1,15 @@
 import React from 'react';
 import { useState } from 'react';
-import { getAuth , signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth , signInWithEmailAndPassword, sendPasswordResetEmail} from "firebase/auth";
 import app from '../../firebase/firebase.config'
+import { useRef } from 'react';
 
 const auth = getAuth(app);
 
 const Login = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const emailRef = useRef();
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -25,14 +27,28 @@ const Login = () => {
         .catch(error => {
             setError(error.message);
         });
+    }
 
+    const handleResetPassword = () => {
+        const email = emailRef.current.value;
+        if(!email){
+            alert('Provide your email...');
+        }
+        sendPasswordResetEmail(auth, email)
+        .then(result => {
+            alert('Please check your email...');
+        })
+        .catch(error => {
+            console.log(error.message);
+            setError(error.message)
+        })
     }
 
     return (
         <div style={{ textAlign:'center', marginTop: '10px'}}>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <input type="email" name="email" placeholder='Email' id="email" required />
+                    <input type="email" ref={emailRef} name="email" placeholder='Email' id="email" required />
                 </div>
                 <br></br>
                 <div>
@@ -41,6 +57,9 @@ const Login = () => {
                 <br></br>
                 <div>
                     <input type="submit" value="Login" />
+                </div>
+                <div style={{ marginTop: '10px'}}>
+                    <button onClick={handleResetPassword}>Forget Password?</button>
                 </div>
                 <div style={{ marginTop: '10px'}}>{error}</div>
                 <div style={{ marginTop: '10px'}}>{success}</div>
